@@ -8,11 +8,11 @@ add_shortcode('tiaa-public-finances', function(){
 	global $wpdb;
 
 	//fetch payments
-	$payments = $wpdb->get_results('SELECT amount, MONTH(created_at) month, YEAR(created_at) year FROM ' . $wpdb->prefix . 'frm_payments WHERE status = "complete" ORDER BY created_at DESC');
+	$payments = $wpdb->get_results('SELECT amount, sub_id, MONTH(created_at) month, YEAR(created_at) year FROM ' . $wpdb->prefix . 'frm_payments WHERE status = "complete" ORDER BY created_at DESC');
 
 	//loop through and build aggregates
 	$months = array();
-	$total = array('sum' => 0, 'count' => 0);
+	$total = array('sum' => 0, 'count' => 0, 'subs_array' => array());
 	foreach ($payments as $payment) {
 		$key = $payment->year . '-' . $payment->month;
 		if (!array_key_exists($key, $months)) $months[$key] = array('sum' => 0, 'count' => 0);
@@ -20,6 +20,7 @@ add_shortcode('tiaa-public-finances', function(){
 		$months[$key]['count']++;
 		$total['sum'] += $payment->amount;
 		$months[$key]['sum'] += $payment->amount;
+		if ($payment->sub_id > 0) $months[$key]['subs_array'][$payment->sub_id]++;
 	}
 
 	return '
@@ -37,6 +38,7 @@ add_shortcode('tiaa-public-finances', function(){
 			<tr>
 				<th>Month</th>
 				<th># Contributions</th>
+				<th># Subscriptions</th>
 				<th>Total</th>
 			</tr>
 		</thead>
@@ -46,6 +48,7 @@ add_shortcode('tiaa-public-finances', function(){
 			return '<tr>
 				<td>' . date('F Y', mktime(1, 1, 1, $month, 1, $year)) . '</td>
 				<td>' . number_format($months[$key]['count']) . '</td>
+				<td>' . number_format(count($months[$key]['subs_array'])) . '</td>
 				<td>$' . number_format($months[$key]['sum'], 2) . '</td>
 			</tr>';
 		}, array_keys($months))) . '
@@ -54,6 +57,7 @@ add_shortcode('tiaa-public-finances', function(){
 			<tr>
 				<td>Total</td>
 				<td>' . number_format($total['count']) . '</td>
+				<td></td>
 				<td>$' . number_format($total['sum'], 2) . '</td>
 			</tr>
 		</tfoot>
