@@ -45,10 +45,12 @@ add_shortcode('tiaa-public-finances', function(){
 		<tbody>
 		' . implode(array_map(function($key) use($months){
 			list($year, $month) = explode('-', $key);
+			$subscription_count = ((!empty($months[$key]['subs_array'])
+                && ($xx = count($months[$key]['subs_array'])))) ? $xx : 0;
 			return '<tr>
 				<td>' . date('F Y', mktime(1, 1, 1, $month, 1, $year)) . '</td>
 				<td>' . number_format($months[$key]['count']) . '</td>
-				<td>' . number_format(count($months[$key]['subs_array'])) . '</td>
+				<td>' . number_format($subscription_count) . '</td>
 				<td>$' . number_format($months[$key]['sum'], 2) . '</td>
 			</tr>';
 		}, array_keys($months))) . '
