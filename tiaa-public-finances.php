@@ -8,7 +8,7 @@ add_shortcode('tiaa-public-finances', function(){
 	global $wpdb;
 
 	//fetch payments
-	$payments = $wpdb->get_results('SELECT amount, sub_id, MONTH(created_at) month, YEAR(created_at) year FROM ' . $wpdb->prefix . 'frm_payments WHERE status = "complete" ORDER BY created_at DESC');
+	$payments = $wpdb->get_results('SELECT amount, sub_id, MONTH(begin_date) month, YEAR(begin_date) year FROM ' . $wpdb->prefix . 'frm_payments WHERE status = "complete" ORDER BY begin_date DESC');
 
 	//loop through and build aggregates
 	$months = array();
